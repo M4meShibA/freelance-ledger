@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>経費の記帳 | 帳簿</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <div class="app-shell">
+    <nav th:replace="~{fragments/nav :: sidebar(active='expenses')}"></nav>
+
+    <main class="content">
+      <div class="page-header">
+        <h1 th:text="${form.id} != null ? '経費の編集' : '経費の記帳'"></h1>
+        <a th:href="@{/expenses}">一覧に戻る</a>
+      </div>
+
+      <form class="form-card" method="post"
+            th:action="${form.id} != null ? @{/expenses/{id}(id=${form.id})} : @{/expenses}"
+            th:object="${form}">
+
+        <div class="form-group">
+          <label for="categoryId">勘定科目</label>
+          <select id="categoryId" th:field="*{categoryId}">
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}"></option>
+          </select>
+          <p class="error-text" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="description">内容</label>
+          <input type="text" id="description" th:field="*{description}">
+        </div>
+
+        <div class="form-group">
+          <label for="amount">金額(円)</label>
+          <input type="number" id="amount" step="1" min="0" th:field="*{amount}">
+          <p class="error-text" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="spentOn">支出日</label>
+          <input type="date" id="spentOn" th:field="*{spentOn}">
+          <p class="error-text" th:if="${#fields.hasErrors('spentOn')}" th:errors="*{spentOn}"></p>
+        </div>
+
+        <button type="submit" class="btn">保存する</button>
+      </form>
+    </main>
+  </div>
+</body>
+</html>

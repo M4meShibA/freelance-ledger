@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${year} + '年 ダッシュボード | 帳簿'"></title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <div class="app-shell">
+    <nav th:replace="~{fragments/nav :: sidebar(active='dashboard')}"></nav>
+
+    <main class="content">
+      <div class="page-header">
+        <h1 th:text="${year} + '年の帳簿'"></h1>
+      </div>
+
+      <div class="year-nav">
+        <a th:href="@{/dashboard(year=${year - 1})}">← <span th:text="${year - 1}"></span>年</a>
+        <a th:href="@{/dashboard(year=${year + 1})}"><span th:text="${year + 1}"></span>年 →</a>
+        <a th:href="@{/dashboard/report.pdf(year=${year})}">年間レポートをPDFで出力</a>
+      </div>
+
+      <div class="summary-cards">
+        <div class="card">
+          <div class="label">年間収入</div>
+          <div class="value" th:text="${#numbers.formatDecimal(summary.totalIncome, 0, 'COMMA', 0, 'POINT')} + ' 円'"></div>
+        </div>
+        <div class="card">
+          <div class="label">年間経費</div>
+          <div class="value" th:text="${#numbers.formatDecimal(summary.totalExpense, 0, 'COMMA', 0, 'POINT')} + ' 円'"></div>
+        </div>
+        <div class="card">
+          <div class="label">事業所得</div>
+          <div class="value" th:text="${#numbers.formatDecimal(summary.totalProfit, 0, 'COMMA', 0, 'POINT')} + ' 円'"></div>
+        </div>
+      </div>
+
+      <h2>月別の推移</h2>
+      <div class="legend">
+        <span class="item"><span class="dot" style="background:var(--income);"></span>収入</span>
+        <span class="item"><span class="dot" style="background:var(--expense);"></span>経費</span>
+      </div>
+      <div class="chart">
+        <div class="month-group" th:each="m : ${summary.months}">
+          <div class="bar income"
+               th:style="'height:' + ${#numbers.formatDecimal(m.totalIncome / maxAmount * 100, 1, 2)} + '%'"
+               th:title="${m.totalIncome} + ' 円'"></div>
+          <div class="bar expense"
+               th:style="'height:' + ${#numbers.formatDecimal(m.totalExpense / maxAmount * 100, 1, 2)} + '%'"
+               th:title="${m.totalExpense} + ' 円'"></div>
+        </div>
+      </div>
+      <div class="chart-labels">
+        <span th:each="m : ${summary.months}" th:text="${m.month.monthValue} + '月'"></span>
+      </div>
+
+      <h2>税金・社会保険料の概算</h2>
+      <table class="ledger">
+        <tbody>
+          <tr>
+            <td>所得税(概算)</td>
+            <td class="amount" th:text="${#numbers.formatDecimal(taxEstimate.incomeTax, 0, 'COMMA', 0, 'POINT')} + ' 円'"></td>
+          </tr>
+          <tr>
+            <td>住民税(概算)</td>
+            <td class="amount" th:text="${#numbers.formatDecimal(taxEstimate.residentTax, 0, 'COMMA', 0, 'POINT')} + ' 円'"></td>
+          </tr>
+          <tr>
+            <td>国民健康保険料(概算)</td>
+            <td class="amount" th:text="${#numbers.formatDecimal(taxEstimate.nationalHealthInsurance, 0, 'COMMA', 0, 'POINT')} + ' 円'"></td>
+          </tr>
+          <tr>
+            <td><strong>税・保険料 合計(概算)</strong></td>
+            <td class="amount"><strong th:text="${#numbers.formatDecimal(taxEstimate.totalTaxAndInsurance, 0, 'COMMA', 0, 'POINT')} + ' 円'"></strong></td>
+          </tr>
+          <tr>
+            <td><strong>概算の手取り</strong></td>
+            <td class="amount amount-income"><strong th:text="${#numbers.formatDecimal(taxEstimate.estimatedNetProfit, 0, 'COMMA', 0, 'POINT')} + ' 円'"></strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="note">
+        上記は学習・ポートフォリオ用の簡易試算です。青色申告特別控除(65万円)・基礎控除を
+        適用した概算であり、実際の税額は扶養控除や社会保険料控除などにより変わります。
+        正確な金額は税理士または確定申告ソフトでご確認ください。
+      </p>
+    </main>
+  </div>
+</body>
+</html>
